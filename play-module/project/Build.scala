@@ -29,6 +29,7 @@ object ApplicationBuild extends Build {
     organization := "com.originate",
     description  := "Scalable resilient to failures WebSocket/Socket.IO messaging module for Scala Play 2 for cloud environments.",
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishTo <<= version { (v: String) =>
       val nexus = "https://oss.sonatype.org/"
       if (v.trim.endsWith("SNAPSHOT"))
