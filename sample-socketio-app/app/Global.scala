@@ -15,26 +15,19 @@
 */
 
 import play.api._
+import play.api.db.slick.Config.driver.profile.simple._
+import plugins.{DatabaseAccess, ConnectionInfos}
 
-import play.api.db.DB
-import play.api.GlobalSettings
-import plugins.ConnectionInfos
-import scala.slick.session.Database
-import Database.threadLocalSession
+object Global extends GlobalSettings with DatabaseAccess {
 
-import play.api.db.slick.Config.driver.simple._
-import play.api.Play.current
-
-object Global extends GlobalSettings {
-  override def onStart(app: Application) {
-    lazy val database = Database.forDataSource(DB.getDataSource())
-
+  override def onStart(app: Application): Unit = {
+    super.onStart(app)
     try {
-      database.withSession {
+      database withSession { implicit session =>
         ConnectionInfos.ddl.create
       }
     } catch {
-      case e: Throwable => Logger.error(s"Error during ConnectionInfos.ddl.create: ${e.getMessage}")
+      case e: Throwable => Logger.error(s"Error during connectionInfos.ddl.create: ${e.getMessage}")
     }
   }
 }

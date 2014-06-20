@@ -16,8 +16,7 @@
 package plugins
 
 import org.joda.time.DateTime
-import play.api.db.slick.Config.driver.simple._
-import scala.slick.lifted.ColumnOption.PrimaryKey
+import play.api.db.slick.Config.driver.profile.simple._
 
 case class ConnectionInfo(
     connectionId: String,
@@ -28,8 +27,8 @@ case class ConnectionInfo(
   val lastRequestTime: DateTime = new DateTime(lastRequestTimestamp)
 }
 
-object ConnectionInfos extends Table[ConnectionInfo]("connection_infos") {
-  def connectionId = column[String]("connection_id", PrimaryKey)
+class ConnectionInfos(tag: Tag) extends Table[ConnectionInfo](tag, "connection_infos") {
+  def connectionId = column[String]("connection_id", O.PrimaryKey)
 
   def clientId = column[String]("client_id")
 
@@ -39,6 +38,8 @@ object ConnectionInfos extends Table[ConnectionInfo]("connection_infos") {
 
   def lastRequestTimestamp = column[Long]("last_request_timestamp")
 
-  def * = connectionId ~ clientId ~ userId ~ connectionActorUrl ~ lastRequestTimestamp <>
-      (ConnectionInfo.apply _, ConnectionInfo.unapply _)
+  def * = (connectionId, clientId, userId, connectionActorUrl, lastRequestTimestamp) <>
+      (ConnectionInfo.tupled, ConnectionInfo.unapply)
 }
+
+object ConnectionInfos extends TableQuery(new ConnectionInfos(_))

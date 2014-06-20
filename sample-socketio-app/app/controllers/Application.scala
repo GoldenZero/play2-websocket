@@ -15,16 +15,12 @@
 */
 package controllers
 
+import java.util.UUID
 import play.api._
 import play.api.mvc._
-import play.api.db.DB
-import java.util.UUID
-import scala.slick.session.Database
-import play.api.Play.current
+import plugins.DatabaseAccess
 
-object Application extends Controller {
-
-  lazy val database = Database.forDataSource(DB.getDataSource())
+object Application extends Controller with DatabaseAccess {
 
   def index = Action {
     implicit request =>

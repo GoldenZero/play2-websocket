@@ -15,14 +15,11 @@
 */
 package plugins
 
-import com.originate.play.websocket.socketio.plugins.SocketIoHooksPlugin
-import com.originate.play.websocket.socketio._
-import play.api.db.slick.Config.driver.simple._
-import Database.threadLocalSession
-import play.api.Logger
-import com.originate.play.websocket.socketio.Event
 import com.originate.play.websocket.ClientConnection
-import com.originate.play.websocket.socketio.Message
+import com.originate.play.websocket.socketio._
+import com.originate.play.websocket.socketio.plugins.SocketIoHooksPlugin
+import play.api.Logger
+import play.api.db.slick.Config.driver.profile.simple._
 
 class SocketIoHooksPluginImpl(val app: play.Application)
     extends SocketIoHooksPlugin
@@ -30,9 +27,9 @@ class SocketIoHooksPluginImpl(val app: play.Application)
   def packetReceivedHook: (ClientConnection, SocketIoPacket) => Unit = {
     (connection, packet) =>
       Logger.info(s"SocketIoHooksPlugin: received packet")
-      database withSession {
-        val q = Query(ConnectionInfos) filter (_.connectionId === connection.connectionId) map (_.lastRequestTimestamp)
-        q.update(System.currentTimeMillis())
+      database withSession { implicit session =>
+        ConnectionInfos.filter(_.connectionId === connection.connectionId).map(_.lastRequestTimestamp)
+            .update(System.currentTimeMillis())
       }
 
       val packetOpt = packet match {
@@ -48,8 +45,8 @@ class SocketIoHooksPluginImpl(val app: play.Application)
       }
 
       packetOpt map {
-        packet => database withSession {
-          val q = Query(ConnectionInfos) filter (_.connectionId =!= connection.connectionId)
+        packet => database withSession { implicit session =>
+          val q = ConnectionInfos.filter(_.connectionId =!= connection.connectionId)
 
           q.list.toSet foreach {
             connectionInfo: ConnectionInfo =>
