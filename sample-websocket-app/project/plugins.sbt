@@ -5,4 +5,11 @@ logLevel := Level.Warn
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 // Use the Play sbt plugin for Play projects
-addSbtPlugin("play" % "sbt-plugin" % "2.1.3")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.0")
+
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
+
+//resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
+
+//addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.6.0")
+

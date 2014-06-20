@@ -18,19 +18,20 @@ package com.originate.play.websocket.plugins
 import com.originate.play.websocket.ClientConnection
 import play.api.Play._
 import play.api.Plugin
+import scala.concurrent.Future
 
 trait ConnectionRegistrar {
-  def register(connection: ClientConnection)
+  def register(connection: ClientConnection): Future[Unit]
 
-  def deregister(connection: ClientConnection)
+  def deregister(connection: ClientConnection): Future[Unit]
 
-  def find(connectionId: String): Option[ClientConnection]
+  def find(connectionId: String): Future[Option[ClientConnection]]
 }
 
 trait ConnectionRegistrarPlugin extends Plugin with ConnectionRegistrar
 
 trait ConnectionRegistrarComponent {
-  val connectionRegistrar: ConnectionRegistrar
+  def connectionRegistrar: ConnectionRegistrar
 }
 
 trait ConnectionRegistrarComponentImpl extends ConnectionRegistrarComponent {

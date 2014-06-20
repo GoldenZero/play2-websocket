@@ -26,6 +26,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.Concurrent
 import scala.concurrent._
 import scala.concurrent.duration._
+import akka.util.Timeout.durationToTimeout
 
 trait WebSocketModuleActorsComponent extends BaseComponent {
   val webSocketModuleActors: WebSocketModuleActors
@@ -39,7 +40,7 @@ trait WebSocketModuleActorsComponent extends BaseComponent {
 
     def actorSystemAddress: Address
 
-    def findActor(actorAddress: String): ActorRef
+    def findActor(actorAddress: String): Future[ActorRef]
 
     def newActor(clientConnection: ClientConnection, channel: Concurrent.Channel[String]): ActorRef
   }
@@ -50,7 +51,7 @@ trait WebSocketModuleActorsComponentImpl extends WebSocketModuleActorsComponent 
   this: WebSocketModuleConfigComponent
       with WebSocketHooksComponent =>
 
-  val webSocketModuleActors: WebSocketModuleActors = new WebSocketModuleActorsImpl
+  lazy val webSocketModuleActors: WebSocketModuleActors = new WebSocketModuleActorsImpl
 
   class WebSocketModuleActorsImpl extends WebSocketModuleActors {
 
@@ -74,11 +75,12 @@ trait WebSocketModuleActorsComponentImpl extends WebSocketModuleActorsComponent 
       }
     }
 
-    lazy val actorSystem = {
-      val timeout = webSocketConfig.getDuration("actor.system.init.timeout") getOrElse {
-        Logger.warn("Cannot find 'actor.system.init.timeout' parameter in websocket config, using 5 sec")
-        5.seconds
-      }
+    val timeout = webSocketConfig.getDuration("actor.system.init.timeout") getOrElse {
+      Logger.warn("Cannot find 'actor.system.init.timeout' parameter in websocket config, using 5 sec")
+      5.seconds
+    }
+
+    val actorSystem = {
       try {
         Await.ready(Future(Akka.system.asInstanceOf[ExtendedActorSystem]), timeout)
       } catch {
@@ -92,12 +94,9 @@ trait WebSocketModuleActorsComponentImpl extends WebSocketModuleActorsComponent 
       Akka.system.asInstanceOf[ExtendedActorSystem]
     }
 
-    def actorSystemAddress = actorSystem.provider match {
-      case rarp: RemoteActorRefProvider => rarp.transport.address
-      case _ => actorSystem.provider.rootPath.address
-    }
+    def actorSystemAddress = actorSystem.provider.getDefaultAddress
 
-    def findActor(actorAddress: String): ActorRef = actorSystem.actorFor(actorAddress)
+    def findActor(actorAddress: String): Future[ActorRef] = actorSystem.actorSelection(actorAddress).resolveOne(timeout)
 
     def newActor(clientConnection: ClientConnection, channel: Concurrent.Channel[String]) = {
       actorSystem.actorOf(

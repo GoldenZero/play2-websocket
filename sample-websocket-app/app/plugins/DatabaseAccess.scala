@@ -15,10 +15,9 @@
 */
 package plugins
 
-import play.api.db.DB
-import scala.slick.session.Database
 import play.api.Play.current
+import play.api.db.slick.Database
 
 trait DatabaseAccess {
-  lazy val database = Database.forDataSource(DB.getDataSource())
+  lazy val database = Database()
 }

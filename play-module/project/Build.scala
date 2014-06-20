@@ -19,27 +19,31 @@ import Keys._
 object ApplicationBuild extends Build {
 
   val appName         = "play2-websocket"
-  val appVersion      = "1.0.3"
+  val appVersion      = "1.0.4"
 
   val appDependencies = Seq(
-    "com.typesafe.akka" %% "akka-remote" % "2.1.2"
+    "com.typesafe.akka" %% "akka-remote" % "2.3.3"
   )
 
-  val main = play.Project(appName, appVersion, appDependencies).settings(
-    organization := "com.originate",
-    description  := "Scalable resilient to failures WebSocket/Socket.IO messaging module for Scala Play 2 for cloud environments.",
-    scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
-    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    publishTo <<= version { (v: String) =>
-      val nexus = "https://oss.sonatype.org/"
-      if (v.trim.endsWith("SNAPSHOT"))
-        Some("snapshots" at nexus + "content/repositories/snapshots")
-      else
-        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-    },
-    publishMavenStyle := true,
-    pomIncludeRepository := { _ => false },
-    pomExtra := (
+  val main = Project(id = appName, base = file("."))
+      .enablePlugins(play.PlayScala)
+      .settings(
+        organization := "com.originate",
+        version := appVersion,
+        description  := "Scalable resilient to failures WebSocket/Socket.IO messaging module for Scala Play 2 for cloud environments.",
+        scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+        libraryDependencies ++= appDependencies,
+        credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+        publishTo <<= version { (v: String) =>
+          val nexus = "https://oss.sonatype.org/"
+          if (v.trim.endsWith("SNAPSHOT"))
+            Some("snapshots" at nexus + "content/repositories/snapshots")
+          else
+            Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+        },
+        publishMavenStyle := true,
+        pomIncludeRepository := { _ => false },
+        pomExtra := (
   <url>https://github.com/Originate/play2-websocket</url>
   <licenses>
     <license>
@@ -59,6 +63,6 @@ object ApplicationBuild extends Build {
       <url>http://originate.com</url>
     </developer>
   </developers>)
-  )
+      )
 
 }

@@ -18,5 +18,5 @@ package com.originate.play.websocket
 import play.api.mvc.WebSocket
 
 object WebSockets extends WebSocketsController {
-  def init: WebSocket[String] = ComponentRegistry.main.webSocketsController.init
+  def init: WebSocket[String, String] = ComponentRegistry.main.webSocketsController.init
 }

@@ -22,7 +22,7 @@ import play.api.mvc.{Controller, WebSocket, AnyContent, Action}
 import scala.concurrent.duration._
 
 trait SocketIoController extends Controller {
-  def init(socketUrl: String): WebSocket[String]
+  def init(socketUrl: String): WebSocket[String, String]
 
   def initSession(socketUrl: String): Action[AnyContent]
 }
@@ -40,7 +40,7 @@ trait SocketIoControllerComponentImpl
 
   class SocketIoControllerImpl extends SocketIoController {
 
-    def init(socketUrl: String): WebSocket[String] = WebSockets.init
+    def init(socketUrl: String): WebSocket[String, String] = WebSockets.init
 
     def initSession(socketUrl: String) = Action {
       implicit request =>

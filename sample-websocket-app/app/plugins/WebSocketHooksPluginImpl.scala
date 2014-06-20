@@ -17,9 +17,8 @@ package plugins
 
 import com.originate.play.websocket.plugins.WebSocketHooksPlugin
 import com.originate.play.websocket.{WebSocketSender, ClientConnection}
-import play.api.db.slick.Config.driver.simple._
-import Database.threadLocalSession
 import play.api.Logger
+import play.api.db.slick.Config.driver.profile.simple._
 
 class WebSocketHooksPluginImpl(val app: play.Application)
     extends WebSocketHooksPlugin
@@ -28,15 +27,13 @@ class WebSocketHooksPluginImpl(val app: play.Application)
     (connection: ClientConnection, message: String) =>
       Logger.info(s"WebSocketHooksPlugin: message received: $connection message=$message")
 
-      database withSession {
-        val q = Query(ConnectionInfos) filter (_.connectionId === connection.connectionId) map (_.lastRequestTimestamp)
+      database withSession { implicit session =>
+        val q = ConnectionInfos.filter(_.connectionId === connection.connectionId) map (_.lastRequestTimestamp)
         q.update(System.currentTimeMillis())
       }
 
-      database withSession {
-        val q = Query(ConnectionInfos) filter (_.connectionId =!= connection.connectionId)
-
-        q.list.toSet foreach {
+      database withSession { implicit session =>
+        ConnectionInfos.filter(_.connectionId =!= connection.connectionId).list.toSet foreach {
           connectionInfo: ConnectionInfo =>
             WebSocketSender.send(connectionInfo.connectionId, s"-> $message")
         }

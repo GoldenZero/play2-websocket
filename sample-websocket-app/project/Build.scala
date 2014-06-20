@@ -15,25 +15,25 @@
 */
 import sbt._
 import Keys._
-import play.Project._
 
 object ApplicationBuild extends Build {
 
-  val appName         = "sample-websocket-app"
-  val appVersion      = "1.0-SNAPSHOT"
-
   val appDependencies = Seq(
-    "com.typesafe.play" %% "play-slick" % "0.3.3",
-    "com.typesafe.slick" %% "slick" % "1.0.0",
-    "com.typesafe.akka" %% "akka-remote" % "2.1.2",
+    "com.typesafe.play" %% "play-slick" % "0.7.0-M1",
+    "com.typesafe.slick" %% "slick" % "2.0.2",
+    "com.typesafe.akka" %% "akka-remote" % "2.3.3",
     "mysql" % "mysql-connector-java" % "5.1.26",
-    "com.originate" %% "play2-websocket" % "1.0.2"
+    "com.originate" %% "play2-websocket" % "1.0.4"
   )
 
-
-  val main = play.Project(appName, appVersion, appDependencies).settings(
-    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-    organization := "com.originate"
-  )
+  lazy val main = project.in(file("."))
+    .enablePlugins(play.PlayScala)
+    .settings(
+      resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+      name := "sample-websocket-app",
+      organization := "com.originate",
+      version := "1.0",
+      libraryDependencies ++= appDependencies
+    )
 
 }

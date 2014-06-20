@@ -18,16 +18,17 @@ package com.originate.play.websocket
 import com.originate.play.websocket.plugins.ConnectionRegistrarComponent
 import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
+import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
 trait WebSocketMessageSender {
-  def disconnect(connectionId: String)
+  def disconnect(connectionId: String): Future[Unit]
 
   // TODO(dtarima): return status of sending the message? (we don't want to expose the actor too much)
   // TODO(dtarima): add sendAsk method?
-  def send(connectionId: String, message: String): Unit
+  def send(connectionId: String, message: String): Future[Unit]
 
-  def scheduleOnce(delay: FiniteDuration, connectionId: String, message: String): Unit
+  def scheduleOnce(delay: FiniteDuration, connectionId: String, message: String): Future[Unit]
 }
 
 trait WebSocketMessageSenderComponent {
@@ -41,27 +42,34 @@ trait WebSocketMessageSenderComponentImpl extends WebSocketMessageSenderComponen
   val webSocketMessageSender: WebSocketMessageSender = new WebSocketMessageSenderImpl
 
   class WebSocketMessageSenderImpl extends WebSocketMessageSender {
-    def disconnect(connectionId: String) {
+    def disconnect(connectionId: String): Future[Unit] = {
       connectionRegistrar.find(connectionId) map {
-        clientConnection =>
-          webSocketModuleActors.findActor(clientConnection.connectionActorUrl) ! Stop
+        _ map {
+          clientConnection =>
+            webSocketModuleActors.findActor(clientConnection.connectionActorUrl) map (_ ! Stop)
+        }
       }
     }
 
-    def send(connectionId: String, message: String) {
+    def send(connectionId: String, message: String): Future[Unit] = {
       // TODO(dtarima): handle failures, like cannot find connection, cannot find actor, cannot send message (ask?)
       connectionRegistrar.find(connectionId) map {
-        clientConnection =>
-          webSocketModuleActors.findActor(clientConnection.connectionActorUrl) ! message
+        _ map {
+          clientConnection =>
+            webSocketModuleActors.findActor(clientConnection.connectionActorUrl) map (_ ! message)
+        }
       }
     }
 
-    def scheduleOnce(delay: FiniteDuration, connectionId: String, message: String) {
+    def scheduleOnce(delay: FiniteDuration, connectionId: String, message: String): Future[Unit] = {
       connectionRegistrar.find(connectionId) map {
-        clientConnection =>
-          val actorRef = webSocketModuleActors.findActor(clientConnection.connectionActorUrl)
-          Logger.debug(s"Schedule message to send in $delay [$connectionId]: $message")
-          webSocketModuleActors.actorSystem.scheduler.scheduleOnce(delay, actorRef, message)
+        _ map {
+          clientConnection =>
+            webSocketModuleActors.findActor(clientConnection.connectionActorUrl) map { actorRef =>
+              Logger.debug(s"Schedule message to send in $delay [$connectionId]: $message")
+              webSocketModuleActors.actorSystem.scheduler.scheduleOnce(delay, actorRef, message)
+            }
+        }
       }
     }
   }

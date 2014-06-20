@@ -16,15 +16,16 @@
 package com.originate.play.websocket
 
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.Future
 
 object WebSocketSender extends WebSocketMessageSender {
 
-  def disconnect(connectionId: String): Unit =
+  def disconnect(connectionId: String): Future[Unit] =
     ComponentRegistry.main.webSocketMessageSender.disconnect(connectionId)
 
-  def send(connectionId: String, message: String): Unit =
+  def send(connectionId: String, message: String): Future[Unit] =
     ComponentRegistry.main.webSocketMessageSender.send(connectionId, message)
 
-  def scheduleOnce(delay: FiniteDuration, connectionId: String, message: String): Unit =
+  def scheduleOnce(delay: FiniteDuration, connectionId: String, message: String): Future[Unit] =
     ComponentRegistry.main.webSocketMessageSender.scheduleOnce(delay, connectionId, message)
 }

@@ -17,6 +17,7 @@ package com.originate.play.websocket.socketio
 
 import com.originate.play.websocket.WebSocketMessageSenderComponent
 import com.originate.play.websocket.plugins.ConnectionRegistrarComponent
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait SocketIoPacketSender {
   def send(connectionId: String, packet: SocketIoPacket): Unit
@@ -35,8 +36,10 @@ trait SocketIoPacketSenderComponentImpl extends SocketIoPacketSenderComponent {
   class SocketIoPacketSenderImpl extends SocketIoPacketSender {
     def send(connectionId: String, packet: SocketIoPacket) {
       connectionRegistrar.find(connectionId) map {
-        clientConnection =>
-          webSocketMessageSender.send(clientConnection.connectionId, packet.serialize())
+        _ map {
+          clientConnection =>
+            webSocketMessageSender.send(clientConnection.connectionId, packet.serialize())
+        }
       }
     }
   }

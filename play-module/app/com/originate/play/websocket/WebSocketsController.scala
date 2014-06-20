@@ -18,6 +18,7 @@ package com.originate.play.websocket
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
+import akka.util.Timeout.durationToTimeout
 import com.originate.play.websocket.plugins.{ClientInformationProviderComponent, WebSocketHooksComponent, ConnectionRegistrarComponent}
 import java.util.UUID
 import play.api.Logger
@@ -28,7 +29,7 @@ import scala.concurrent.duration._
 
 trait WebSocketsController
     extends Controller {
-  def init: WebSocket[String]
+  def init: WebSocket[String, String]
 }
 
 trait WebSocketsControllerComponent {
@@ -65,7 +66,7 @@ trait WebSocketsControllerComponentImpl
                 Logger.debug(s"Message received $connection: $msg")
                 val receive = webSocketHooks.messageReceivedHook
                 receive(connection, msg)
-            }.mapDone {
+            }.map {
               _ =>
                 connectionRegistrar.deregister(connection)
                 shutdown(connection, connectionActorRef)
@@ -87,7 +88,7 @@ trait WebSocketsControllerComponentImpl
         5.seconds
       }
 
-      implicit val timeout = Timeout(timeoutDuration)
+      implicit val timeout: Timeout = timeoutDuration
 
       connectionActorRef ? Stop map {
         case Ack => Logger.debug(s"Actor stopping acknowledged $connection")
