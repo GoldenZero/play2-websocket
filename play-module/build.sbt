@@ -1,4 +1,4 @@
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.1"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
@@ -6,7 +6,7 @@ name := "play2-websocket"
 
 organization := "com.originate"
 
-version := "1.0.4"
+version := "1.0.5"
 
 description  := "Scalable resilient to failures WebSocket/Socket.IO messaging module for Scala Play 2 for cloud environments."
 
