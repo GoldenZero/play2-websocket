@@ -11,7 +11,7 @@ version := "1.1"
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick" % "0.8.0",
   "com.typesafe.slick" %% "slick" % "2.1.0",
-  "com.typesafe.akka" %% "akka-remote" % "2.3.3",
+  "com.typesafe.akka" %% "akka-remote" % "2.3.5",
   "mysql" % "mysql-connector-java" % "5.1.26",
   "com.originate" %% "play2-websocket" % "1.0.5"
 )
