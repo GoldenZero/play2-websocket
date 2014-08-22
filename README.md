@@ -6,11 +6,11 @@ The latest jars can be found in OSS sonatype repository: https://oss.sonatype.or
 
 Software versions
 -----------------
-Scala 2.10
+Scala 2.11.1
 
-Play 2.1.3
+Play 2.3
 
-Akka 2.1.2
+Akka 2.3.5
 
 Socket.io.js 0.9.16
 
